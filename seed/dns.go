@@ -23,6 +23,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// DnsServerConfig holds the configuration options for a DnsServer.
+type DnsServerConfig struct {
+	// ChainViews is a map of chain prefixes to their respective network
+	// views.
+	ChainViews map[string]*ChainView
+
+	// ListenAddrUDP is the UDP listen address for incoming requests.
+	ListenAddrUDP string
+
+	// ListenAddrTCP is the TCP listen address for incoming requests.
+	ListenAddrTCP string
+
+	// RootDomain is the root DNS seed domain.
+	RootDomain string
+
+	// AuthoritativeIP is the IP address of the authoritative name server.
+	AuthoritativeIP net.IP
+
+	// NumResults is the number of results to return for a query.
+	NumResults int
+}
+
 type DnsServer struct {
 	chainViews      map[string]*ChainView
 	listenAddrUDP   string
@@ -32,16 +54,14 @@ type DnsServer struct {
 	numResults      int
 }
 
-func NewDnsServer(chainViews map[string]*ChainView, listenAddrUDP, listenAddrTCP, rootDomain string,
-	authoritativeIP net.IP, numResults int) *DnsServer {
-
+func NewDnsServer(cfg DnsServerConfig) *DnsServer {
 	return &DnsServer{
-		chainViews:      chainViews,
-		listenAddrUDP:   listenAddrUDP,
-		listenAddrTCP:   listenAddrTCP,
-		rootDomain:      rootDomain,
-		authoritativeIP: authoritativeIP,
-		numResults:      numResults,
+		chainViews:      cfg.ChainViews,
+		listenAddrUDP:   cfg.ListenAddrUDP,
+		listenAddrTCP:   cfg.ListenAddrTCP,
+		rootDomain:      cfg.RootDomain,
+		authoritativeIP: cfg.AuthoritativeIP,
+		numResults:      cfg.NumResults,
 	}
 }
 

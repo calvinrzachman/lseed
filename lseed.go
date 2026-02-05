@@ -301,10 +301,15 @@ func main() {
 	}
 
 	rootIP := net.ParseIP(*authoritativeIP)
-	dnsServer := seed.NewDnsServer(
-		netViewMap, *listenAddrUDP, *listenAddrTCP, *rootDomain, rootIP,
-		*numResults,
-	)
+	dnsCfg := seed.DnsServerConfig{
+		ChainViews:      netViewMap,
+		ListenAddrUDP:   *listenAddrUDP,
+		ListenAddrTCP:   *listenAddrTCP,
+		RootDomain:      *rootDomain,
+		AuthoritativeIP: rootIP,
+		NumResults:      *numResults,
+	}
+	dnsServer := seed.NewDnsServer(dnsCfg)
 
 	dnsServer.Serve()
 }
