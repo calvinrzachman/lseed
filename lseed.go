@@ -58,6 +58,11 @@ var (
 	debug = flag.Bool("debug", false, "Be very verbose")
 
 	numResults = flag.Int("results", 25, "How many results shall we return to a query?")
+
+	maxConcurrentChecks = flag.Int(
+		"max-concurrent-checks", 100, "The max number of concurrent "+
+			"reachability checks.",
+	)
 )
 
 var (
@@ -202,7 +207,11 @@ func main() {
 			panic(fmt.Sprintf("unable to connect to btc lnd: %v", err))
 		}
 
-		nView := seed.NewNetworkView("bitcoin")
+		cfg := seed.NetworkViewConfig{
+			Chain:               "bitcoin",
+			MaxConcurrentChecks: *maxConcurrentChecks,
+		}
+		nView := seed.NewNetworkView(cfg)
 		go poller(lndNode, nView)
 
 		log.Infof("BTC chain view active")
@@ -224,7 +233,11 @@ func main() {
 			panic(fmt.Sprintf("unable to connect to ltc lnd: %v", err))
 		}
 
-		nView := seed.NewNetworkView("litecoin")
+		cfg := seed.NetworkViewConfig{
+			Chain:               "litecoin",
+			MaxConcurrentChecks: *maxConcurrentChecks,
+		}
+		nView := seed.NewNetworkView(cfg)
 		go poller(lndNode, nView)
 
 		netViewMap["ltc."] = &seed.ChainView{
@@ -243,7 +256,11 @@ func main() {
 			panic(fmt.Sprintf("unable to connect to test lnd: %v", err))
 		}
 
-		nView := seed.NewNetworkView("testnet")
+		cfg := seed.NetworkViewConfig{
+			Chain:               "testnet",
+			MaxConcurrentChecks: *maxConcurrentChecks,
+		}
+		nView := seed.NewNetworkView(cfg)
 		go poller(lndNode, nView)
 
 		log.Infof("TBCT chain view active")
@@ -264,7 +281,11 @@ func main() {
 			panic(fmt.Sprintf("unable to connect to signet lnd: %v", err))
 		}
 
-		nView := seed.NewNetworkView("signet")
+		cfg := seed.NetworkViewConfig{
+			Chain:               "signet",
+			MaxConcurrentChecks: *maxConcurrentChecks,
+		}
+		nView := seed.NewNetworkView(cfg)
 		go poller(lndNode, nView)
 
 		log.Infof("Signet chain view active")
@@ -285,7 +306,11 @@ func main() {
 			panic(fmt.Sprintf("unable to connect to testnet4 lnd: %v", err))
 		}
 
-		nView := seed.NewNetworkView("testnet4")
+		cfg := seed.NetworkViewConfig{
+			Chain:               "testnet4",
+			MaxConcurrentChecks: *maxConcurrentChecks,
+		}
+		nView := seed.NewNetworkView(cfg)
 		go poller(lndNode, nView)
 
 		log.Infof("Testnet4 chain view active")

@@ -62,18 +62,32 @@ type NetworkView struct {
 	reachableNodes map[string]Node
 
 	freshNodes chan Node
+
+	maxConcurrentChecks int
+}
+
+// NetworkViewConfig holds the configuration options for a NetworkView.
+type NetworkViewConfig struct {
+	// Chain is the name of the chain this view is for.
+	Chain string
+
+	// MaxConcurrentChecks is the maximum number of concurrent reachability
+	// checks to perform.
+	MaxConcurrentChecks int
 }
 
 // NewNetworkView creates a new instance of a NetworkView.
-func NewNetworkView(chain string) *NetworkView {
+func NewNetworkView(cfg NetworkViewConfig) *NetworkView {
 	n := &NetworkView{
-		chain:          chain,
-		allNodes:       make(map[string]Node),
-		reachableNodes: make(map[string]Node),
-		freshNodes:     make(chan Node, 100),
+		chain:               cfg.Chain,
+		allNodes:            make(map[string]Node),
+		reachableNodes:      make(map[string]Node),
+		freshNodes:          make(chan Node, cfg.MaxConcurrentChecks),
+		maxConcurrentChecks: cfg.MaxConcurrentChecks,
 	}
 
 	go n.reachabilityPruner()
+
 	return n
 }
 
@@ -260,9 +274,8 @@ func (nv *NetworkView) reachabilityPruner() {
 		nv.Unlock()
 	}
 
-	numFds := 100
-	searchSema := make(chan struct{}, 100)
-	for i := 0; i < numFds; i++ {
+	searchSema := make(chan struct{}, nv.maxConcurrentChecks)
+	for i := 0; i < nv.maxConcurrentChecks; i++ {
 		searchSema <- struct{}{}
 	}
 	for {
