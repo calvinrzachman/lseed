@@ -303,6 +303,7 @@ func main() {
 	rootIP := net.ParseIP(*authoritativeIP)
 	dnsServer := seed.NewDnsServer(
 		netViewMap, *listenAddrUDP, *listenAddrTCP, *rootDomain, rootIP,
+		*numResults,
 	)
 
 	dnsServer.Serve()

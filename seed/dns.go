@@ -29,10 +29,11 @@ type DnsServer struct {
 	listenAddrTCP   string
 	rootDomain      string
 	authoritativeIP net.IP
+	numResults      int
 }
 
 func NewDnsServer(chainViews map[string]*ChainView, listenAddrUDP, listenAddrTCP, rootDomain string,
-	authoritativeIP net.IP) *DnsServer {
+	authoritativeIP net.IP, numResults int) *DnsServer {
 
 	return &DnsServer{
 		chainViews:      chainViews,
@@ -40,6 +41,7 @@ func NewDnsServer(chainViews map[string]*ChainView, listenAddrUDP, listenAddrTCP
 		listenAddrTCP:   listenAddrTCP,
 		rootDomain:      rootDomain,
 		authoritativeIP: authoritativeIP,
+		numResults:      numResults,
 	}
 }
 
@@ -133,7 +135,7 @@ func (ds *DnsServer) handleAAAAQuery(request *dns.Msg, response *dns.Msg,
 		return
 	}
 
-	nodes := chainView.NetView.RandomSample(3, 25)
+	nodes := chainView.NetView.RandomSample(3, ds.numResults)
 	for _, n := range nodes {
 		addAAAAResponse(n, request.Question[0].Name, &response.Answer)
 	}
@@ -149,7 +151,7 @@ func (ds *DnsServer) handleAQuery(request *dns.Msg, response *dns.Msg,
 		return
 	}
 
-	nodes := chainView.NetView.RandomSample(2, 25)
+	nodes := chainView.NetView.RandomSample(2, ds.numResults)
 
 	for _, n := range nodes {
 		addAResponse(n, request.Question[0].Name, &response.Answer)
@@ -202,7 +204,7 @@ func (ds *DnsServer) handleSRVQuery(request *dns.Msg, response *dns.Msg,
 		return
 	}
 
-	nodes := chainView.NetView.RandomSample(255, 25)
+	nodes := chainView.NetView.RandomSample(255, ds.numResults)
 
 	header := dns.RR_Header{
 		Name:   request.Question[0].Name,
